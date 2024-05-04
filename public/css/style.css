@@ -1,0 +1,24 @@
+#gauge-speedometer {
+  /* position: absolute; */
+  /* margin-top: -90px; */
+  margin-left: 0%;
+  z-index: 9999999;
+  visibility: visible;
+}
+
+#gauge-compass {
+  /* position: absolute; */
+  /* margin-top: -90px; */
+  margin-left: 0%;
+  z-index: 9999999;
+  visibility: visible;
+}
+
+
+#gauge-altimeter {
+  position: absolute;
+  margin-top: -240px;
+  margin-left: -20px;
+  z-index: 9999999;
+  visibility: visible;
+}

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Track</title>
+    <link rel="stylesheet" href="css/style.css" />
+
+    <style>
+      #map {
+        height: 80%;
+      }
+
+      .aside {
+        float: left;
+        width: 16%;
+        height: 100vh;
+        /* background-color: #f1f1f1; */
+        padding: 20px;
+      }
+
+      .box {
+        display: inline-block;
+        width: 78%;
+        height: 100vh;
+        padding: 20px;
+      }
+
+      #example {
+        width: 16em;
+        height: 16em;
+      }
+    </style>
+
+    <!-- LEAFLET -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+
+    <!-- GAUGE -->
+    <link
+      rel="stylesheet"
+      href="js/analog-digital-gauge/jquery.simplegauge.css"
+    />
+    <script src="js/jquery/jquery.min.js"></script>
+    <script src="js/analog-digital-gauge/jquery.simplegauge.js"></script>
+
+    <!-- <script src="utils.js"></script> -->
+    <script src="js/canvas-gauges/gauge.min.js"></script>
+
+    <script src="js/utils.js"></script>
+  </head>
+  <body style="background-color: rgb(25, 39, 39)">
+    <nav>
+      <center>
+        <h1>Drone Tracking</h1>
+      </center>
+    </nav>
+    <div>
+      <div class="aside" style="background-color: rgb(34, 56, 56)">
+        <aside>
+          <h2>Navigation Information</h2>
+          <table>
+            <tr>
+              <td><b>Speed:</b></td>
+              <td><span id="drone-speed">0</span> m/s</td>
+            </tr>
+            <tr>
+              <td><b>Altitude<i>(m)</i>:</b></td>
+              <td>
+                <span id="drone-altitude">0</span> (<span
+                  id="drone-alt-ground-ref"
+                  >0</span
+                >)
+              </td>
+            </tr>
+            <tr>
+              <td><b>Time (UTC):</b></td>
+              <td><span id="drone-time">00:00:00</span></td>
+            </tr>
+            <tr>
+              <td><b>Distance:</b></td>
+              <td><span id="drone-distance">0</span> meters away</td>
+            </tr>
+            <tr>
+              <td><b>Direction:</b></td>
+              <td>
+                <span id="drone-direction">360.0</span>&deg;
+                <span id="drone-direction-compass"></span>
+              </td>
+            </tr>
+          </table>
+
+          <canvas
+            id="gauge-speedometer"
+            data-type="radial-gauge"
+            data-width="200"
+            data-height="200"
+            data-units="m/s"
+            data-title="false"
+            data-min-value="10"
+            data-max-value="100"
+            data-value="33.77"
+            data-animate-on-init="true"
+            data-major-ticks="0,10,20,30,40,50,60,70,80,90,100"
+            data-minor-ticks="2"
+            data-stroke-ticks="true"
+            data-highlights='[{"from": 75, "to": 100, "color": "rgba(200, 50, 50, .75)"}]'
+            data-color-plate="#222"
+            data-color-major-ticks="#f5f5f5"
+            data-color-minor-ticks="#ddd"
+            data-color-title="#fff"
+            data-color-units="#ccc"
+            data-color-numbers="#eee"
+            data-color-needle-start="rgba(240, 128, 128, 1)"
+            data-color-needle-end="rgba(255, 160, 122, .9)"
+            data-value-box="true"
+            data-font-value="Led"
+            data-font-numbers="Led"
+            data-animated-value="true"
+            data-borders="false"
+            data-border-shadow-width="0"
+            data-needle-type="arrow"
+            data-needle-width="2"
+            data-needle-circle-size="7"
+            data-needle-circle-outer="true"
+            data-needle-circle-inner="false"
+            data-animation-duration="1500"
+            data-animation-rule="linear"
+            data-ticks-angle="250"
+            data-start-angle="55"
+            data-color-needle-shadow-down="#333"
+          ></canvas>
+
+          <canvas
+            id="gauge-compass"
+            data-type="radial-gauge"
+            data-width="200"
+            data-height="200"
+            data-min-value="0"
+            data-max-value="360"
+            data-major-ticks="N,NE,E,SE,S,SW,W,NW,N"
+            data-minor-ticks="22"
+            data-ticks-angle="360"
+            data-start-angle="180"
+            data-stroke-ticks="false"
+            data-highlights="false"
+            data-color-plate="#222"
+            data-color-major-ticks="#f5f5f5"
+            data-color-minor-ticks="#ddd"
+            data-color-numbers="#ccc"
+            data-color-needle="rgba(240, 128, 128, 1)"
+            data-color-needle-end="rgba(255, 160, 122, .9)"
+            data-value-box="false"
+            data-value-text-shadow="false"
+            data-color-circle-inner="#fff"
+            data-color-needle-circle-outer="#ccc"
+            data-needle-circle-size="15"
+            data-needle-circle-outer="false"
+            data-animation-rule="linear"
+            data-animation-target="plate"
+            data-needle-type="line"
+            data-needle-start="75"
+            data-needle-end="99"
+            data-needle-width="3"
+            data-borders="true"
+            data-border-inner-width="0"
+            data-border-middle-width="0"
+            data-border-outer-width="10"
+            data-color-border-outer="#ccc"
+            data-color-border-outer-end="#ccc"
+            data-color-needle-shadow-down="#222"
+            data-border-shadow-width="0"
+            data-font-value="Led"
+          ></canvas>
+
+          <canvas
+            id="gauge-altimeter"
+            data-type="linear-gauge"
+            data-width="100"
+            data-height="450"
+            data-min-value="0"
+            data-max-value="30"
+            data-major-ticks="0,5,10,20,25,30"
+            data-minor-ticks="10"
+            data-stroke-ticks="true"
+            data-color-plate="transparent"
+            data-border-shadow-width="0"
+            data-borders="false"
+            data-bar-begin-circle="false"
+            data-tick-side="left"
+            data-number-side="left"
+            data-color-numbers="#ffffff"
+            data-needle-side="left"
+            data-needle-type="line"
+            data-needle-width="3"
+            data-color-needle="#d22"
+            data-color-needle-end="#222"
+            data-animation-duration="1500"
+            data-animation-rule="linear"
+            data-animation-target="plate"
+            data-bar-width="5"
+            data-ticks-width="50"
+            data-ticks-width-minor="15"
+          ></canvas>
+        </aside>
+      </div>
+      <div class="box">
+        <div id="map" style="margin-top: -20px"></div>
+      </div>
+    </div>
+
+    <!-- <script src="js/utils.js"></script> -->
+    <script>
+      let map = L.map("map").setView([51.505, -0.09], 19);
+
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution:
+          '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      }).addTo(map);
+
+      let droneIcon = L.icon({
+        iconUrl: "images/drone.svg",
+
+        iconSize: [38, 95],
+        iconAnchor: [22, 94],
+        popupAnchor: [-3, -76],
+      });
+
+      let baseStationIcon = L.icon({
+        iconUrl: "images/base-station.svg",
+
+        iconSize: [38, 95],
+        iconAnchor: [22, 94],
+        popupAnchor: [-3, -76],
+      });
+
+      let droneMarker = L.marker([51.5, -0.09], { icon: droneIcon }).addTo(map);
+      let baseMarker = null;
+
+      map.setView([51.5, -0.09], 19);
+
+      let dronePopupOpen = false;
+      let basePopupOpen = false;
+      // set on click
+      function toggleDroneMarkerPopup(e) {
+        let cood = e.latlng;
+
+        if (dronePopupOpen) {
+          droneMarker
+            .bindPopup("<b>Drone Position</b><br>" + cood)
+            .closePopup();
+          dronePopupOpen = false;
+          console.log("Closing marker popup");
+        } else {
+          droneMarker.bindPopup("<b>Drone Position</b><br>" + cood).openPopup();
+          dronePopupOpen = true;
+          console.log("Opening marker popup");
+        }
+      }
+
+      function toggleBaseMarkerPopup(e) {
+        let cood = e.latlng;
+
+        if (basePopupOpen) {
+          baseMarker.bindPopup("<b>Base Station</b><br>" + cood).closePopup();
+          basePopupOpen = false;
+          console.log("Closing marker popup");
+        } else {
+          baseMarker.bindPopup("<b>Base Station</b><br>" + cood).openPopup();
+          basePopupOpen = true;
+          console.log("Opening marker popup");
+        }
+      }
+
+      droneMarker.on("click", toggleDroneMarkerPopup);
+    </script>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+      let baseSet = false;
+      socket.on("serialData", (data) => {
+        // console.log(data[0]);
+        let serialData = data[0];
+        let lat = serialData.lat;
+        let lng = serialData.lng;
+        let baseLat = serialData.baseLat;
+        let baseLng = serialData.baseLng;
+        let speed = serialData.speed.toFixed(2);
+        let mTime = serialData.mTime;
+        let alt = serialData.alt.toFixed(2);
+        let referencedAlt = (alt - serialData.baseAlt).toFixed(2);
+        let course = serialData.course.toFixed(2);
+        let distanceFromBase = serialData.distance.toFixed(2);
+
+        droneMarker.setLatLng([lat, lng]);
+        map.setView([lat, lng], 19 /*zoom*/);
+
+        if (!baseSet) {
+          baseMarker = L.marker([baseLat, baseLng], {
+            icon: baseStationIcon,
+          }).addTo(map);
+          baseMarker.on("click", toggleBaseMarkerPopup);
+          baseSet = true;
+        }
+
+        // option to set a line
+        /*
+        var pointList = [
+          [lat, lng],
+          [baseLat, baseLng],
+        ];
+
+        let firstPolyline = new L.polyline(pointList, {
+          color: "red",
+          weight: 3,
+          opacity: 0.5,
+          smoothFactor: 1,
+        });
+        firstPolyline.addTo(map);
+        */
+
+        document.getElementById("drone-speed").innerHTML = speed;
+        document.getElementById("drone-altitude").innerHTML = alt;
+        document.getElementById("drone-alt-ground-ref").innerHTML =
+          referencedAlt;
+        document.getElementById("drone-time").innerHTML = mTime;
+        document.getElementById("drone-distance").innerHTML = distanceFromBase;
+        document.getElementById("drone-direction").innerHTML = course;
+
+        let speedometer = document.getElementById("gauge-speedometer");
+        speedometer.setAttribute("data-value", speed);
+
+        let compassData = course;
+        let compass = document.getElementById("gauge-compass");
+        compass.setAttribute("data-value", compassData);
+
+        let altimeter = document.getElementById("gauge-altimeter");
+        altimeter.setAttribute("data-value", referencedAlt);
+      });
+    </script>
+  </body>
+</html>
